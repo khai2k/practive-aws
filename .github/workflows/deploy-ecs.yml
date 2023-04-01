@@ -17,6 +17,7 @@ jobs:
       ECS_SERVICE: khaitest
       DOCKER_IMAGE_NAME: my-node-app
       DOCKER_IMAGE_TAG: ${{ github.sha }}
+      ECR_REPOSITORY_NAME: my-node-app
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -37,17 +38,14 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          tags: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
           registry: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           build-args: |
             - BUILD_ENV=production
 
-      - name: Deploy to Amazon ECS
-        uses: appleboy/ecs-deploy@v2.5.1
+      - name: Update ECS service
+        uses: aws-actions/amazon-ecs-deploy@v1
         with:
-          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          region: ${{ env.AWS_REGION }}
-          service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
-          image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
+          service: ${{ env.ECS_SERVICE }}
+          image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
