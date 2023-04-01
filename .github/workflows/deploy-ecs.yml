@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REPOSITORY: public.ecr.aws/f5f5j0q9/my-node-app
+  ECR_REPOSITORY: public.ecr.aws/f5f5j0q9
   ECS_CLUSTER: testx
   ECS_SERVICE: khaitest
 
@@ -18,22 +18,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Login to AWS ECR
+       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-        with:
-          registry: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - name: Build and push Docker image to ECR
-        id: build-and-push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/<ECR_REPOSITORY_NAME>:<TAG_NAME>
-      - name: Print the URL of the new Docker image
-        run: echo ${{ steps.build-and-push.outputs.digest }}
 
-      - name: Update ECS task definition with new image
-        run: aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].taskDefinition' --output text) --force-new-deployment
+      - name: build and push docker image
+        env:
+          CI: true
+          AWS_ECR_ACCOUNT_URL: ${{ secrets.ECR_REPOSITORY }}
+        run: |
+          COMMIT_AUTHOR=`git log -1 --pretty=format:'%an'`
+          COMMIT_MESSAGE=`git log -1 --pretty=%B`
+          docker build -f ./docker/admin-api/Dockerfile -t ${env.ECR_REPOSITORY}/my-node-app .
+          docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app
+          docker tag ${AWS_ECR_ACCOUNT_URL}/my-node-app ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
+          docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
