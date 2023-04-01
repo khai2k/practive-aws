@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-southeast-1
-  ECR_REPOSITORY: public.ecr.aws/f5f5j0q9
+  AWS_ECR_ACCOUNT_URL: public.ecr.aws/f5f5j0q9
   ECS_CLUSTER: testx
   ECS_SERVICE: khaitest
 
@@ -15,21 +15,27 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
-       - name: Login to Amazon ECR
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: build and push docker image
         env:
           CI: true
-          AWS_ECR_ACCOUNT_URL: ${{ secrets.ECR_REPOSITORY }}
+          AWS_ECR_ACCOUNT_URL: ${{ secrets.AWS_ECR_ACCOUNT_URL }}
         run: |
           COMMIT_AUTHOR=`git log -1 --pretty=format:'%an'`
           COMMIT_MESSAGE=`git log -1 --pretty=%B`
-          docker build -f ./docker/admin-api/Dockerfile -t ${env.ECR_REPOSITORY}/my-node-app .
+          docker build -f ./docker/admin-api/Dockerfile -t ${AWS_ECR_ACCOUNT_URL}/my-node-app .
           docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app
           docker tag ${AWS_ECR_ACCOUNT_URL}/my-node-app ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
           docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
