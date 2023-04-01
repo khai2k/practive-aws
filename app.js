@@ -14,7 +14,7 @@ const BUCKET_NAME = process.env.BUCKET_NAME;
 console.log("🚀 ~ file: app.js:13 ~ BUCKET_NAME:", BUCKET_NAME);
 
 app.get("/health", (req, res) => {
-  res.send("OK");
+  res.send("v1 ne");
 });
 
 // Get all objects in S3 bucket
