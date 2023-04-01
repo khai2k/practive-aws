@@ -28,6 +28,10 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Authenticate Docker client to ECR Public registry
+        run: |
+          aws ecr-public get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ECR_ACCOUNT_URL }}
+
       - name: build and push docker image
         env:
           CI: true
