@@ -41,7 +41,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ steps.tag-image.outputs.image-uri }}
+          tags: ${{ env.ECR_REPOSITORY }}:latest
 
       - name: Update ECS task definition with new image
         run: aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].taskDefinition' --output text) --force-new-deployment
