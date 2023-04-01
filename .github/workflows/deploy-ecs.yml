@@ -31,10 +31,10 @@ jobs:
       - name: build and push docker image
         env:
           CI: true
-          AWS_ECR_ACCOUNT_URL: ${{ secrets.AWS_ECR_ACCOUNT_URL }}
+          AWS_ECR_ACCOUNT_URL: ${{ env.AWS_ECR_ACCOUNT_URL }}
         run: |
           COMMIT_AUTHOR=`git log -1 --pretty=format:'%an'`
           COMMIT_MESSAGE=`git log -1 --pretty=%B`
           docker build -t my-node-app .
-          docker tag my-node-app ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
-          docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
+          docker tag my-node-app ${env.AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
+          docker push ${env.AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
