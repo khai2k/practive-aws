@@ -42,12 +42,12 @@ jobs:
           build-args: |
             - BUILD_ENV=production
 
-      - name: Update ECS service
-        uses: aws-actions/amazon-ecs-deploy@v1
+      - name: Deploy to Amazon ECS
+        uses: appleboy/ecs-deploy@v2.5.1
         with:
-          cluster: ${{ env.ECS_CLUSTER }}
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ${{ env.AWS_REGION }}
           service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
           image: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.DOCKER_IMAGE_NAME }}:${{ env.DOCKER_IMAGE_TAG }}
-        env:
-          ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-          AWS_REGION: ${{ env.AWS_REGION }}
