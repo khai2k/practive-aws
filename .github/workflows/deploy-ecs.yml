@@ -35,7 +35,6 @@ jobs:
         run: |
           COMMIT_AUTHOR=`git log -1 --pretty=format:'%an'`
           COMMIT_MESSAGE=`git log -1 --pretty=%B`
-          docker build -f ./docker/admin-api/Dockerfile -t ${AWS_ECR_ACCOUNT_URL}/my-node-app .
-          docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app
-          docker tag ${AWS_ECR_ACCOUNT_URL}/my-node-app ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
+          docker build -t my-node-app .
+          docker tag my-node-app ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
           docker push ${AWS_ECR_ACCOUNT_URL}/my-node-app:${GITHUB_SHA}
